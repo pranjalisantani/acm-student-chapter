@@ -35,28 +35,40 @@ export default function App() {
   const audio = useRef(null)
 
   const list = useMemo(
-    () => (filter === 'All' ? events : events.filter((x) => x.type === filter)),
+    () =>
+      filter === 'All'
+        ? events
+        : events.filter((x) => x.type === filter),
     [filter]
   )
 
+  // AUDIO SETUP
   useEffect(() => {
-    const audioPath = `${import.meta.env.BASE_URL}assets/audio/struct.mpeg`
+    const audioUrl = `${import.meta.env.BASE_URL}assets/audio/struct.mpeg`
 
-    audio.current = new Audio(audioPath)
+    audio.current = new Audio(audioUrl)
     audio.current.loop = true
     audio.current.volume = 0.18
+    audio.current.preload = 'auto'
 
     const pref = localStorage.getItem('acm-sound')
     setSound(pref === 'on')
 
     return () => {
-      audio.current?.pause()
-      audio.current = null
+      if (audio.current) {
+        audio.current.pause()
+        audio.current.src = ''
+        audio.current = null
+      }
     }
   }, [])
 
+  // SOUND TOGGLE
   async function setAudio(next) {
-    if (!audio.current) return
+    if (!audio.current) {
+      console.error('Audio element is not ready')
+      return
+    }
 
     if (next) {
       try {
@@ -75,11 +87,12 @@ export default function App() {
     }
   }
 
+  // BOOT SCREEN ENTER
   function enter() {
     setBoot(false)
 
-    // The Boot button click is a real user interaction,
-    // so the browser allows audio playback here.
+    // Boot button click is a real user interaction,
+    // allowing the browser to start audio.
     setTimeout(() => {
       setAudio(true)
     }, 0)
@@ -93,7 +106,13 @@ export default function App() {
 
       {boot && <Boot enter={enter} />}
 
-      <div className={boot ? 'experience experience--locked' : 'experience'}>
+      <div
+        className={
+          boot
+            ? 'experience experience--locked'
+            : 'experience'
+        }
+      >
         <Nav />
 
         <Sound
@@ -106,7 +125,8 @@ export default function App() {
             <div className="hero__grid">
               <div className="hero__copy">
                 <p>
-                  ACM // STUDENT CHAPTER <i>NETWORK FIELD: ACTIVE</i>
+                  ACM // STUDENT CHAPTER{' '}
+                  <i>NETWORK FIELD: ACTIVE</i>
                 </p>
 
                 <h1>
@@ -117,12 +137,14 @@ export default function App() {
 
                 <span>
                   ACM Student Chapter is a home for restless learners,
-                  generous builders, and technically curious students shaping
-                  the future through computing.
+                  generous builders, and technically curious students
+                  shaping the future through computing.
                 </span>
 
                 <div className="actions">
-                  <Button href="#events">EXPLORE EVENTS</Button>
+                  <Button href="#events">
+                    EXPLORE EVENTS
+                  </Button>
 
                   <Button href="#contact" quiet>
                     JOIN THE COMMUNITY
@@ -228,9 +250,15 @@ export default function App() {
 
             <div className="eventgrid">
               {list.map((e, i) => (
-                <article className="event glass" key={e.title}>
+                <article
+                  className="event glass"
+                  key={e.title}
+                >
                   <div>
-                    <span>EVENT {String(i + 1).padStart(3, '0')}</span>
+                    <span>
+                      EVENT {String(i + 1).padStart(3, '0')}
+                    </span>
+
                     <span>{e.status}</span>
                   </div>
 
@@ -268,13 +296,20 @@ export default function App() {
 
               <b>FREE</b>
 
-              <span>Open ACM event participation</span>
+              <span>
+                Open ACM event participation
+              </span>
 
-              <Button href="#events">CHOOSE AN EVENT</Button>
+              <Button href="#events">
+                CHOOSE AN EVENT
+              </Button>
             </article>
           </section>
 
-          <section id="members" className="section members">
+          <section
+            id="members"
+            className="section members"
+          >
             <Heading
               tag="03 / ACM MEMBER ARCHIVE"
               title={
@@ -290,7 +325,10 @@ export default function App() {
             <ProfileArchive />
           </section>
 
-          <section id="projects" className="section projects">
+          <section
+            id="projects"
+            className="section projects"
+          >
             <Heading
               tag="04 / WORK IN PROGRESS"
               title={
@@ -305,7 +343,10 @@ export default function App() {
 
             <div>
               {projects.map((p, i) => (
-                <article className="glass" key={p.title}>
+                <article
+                  className="glass"
+                  key={p.title}
+                >
                   <small>
                     0{i + 1} / {p.category}
                   </small>
@@ -328,7 +369,10 @@ export default function App() {
             </div>
           </section>
 
-          <section id="achievements" className="section milestones">
+          <section
+            id="achievements"
+            className="section milestones"
+          >
             <Heading
               tag="05 / MILESTONES"
               title={
@@ -368,7 +412,10 @@ export default function App() {
             </div>
           </section>
 
-          <section id="resources" className="section resources">
+          <section
+            id="resources"
+            className="section resources"
+          >
             <Heading
               tag="06 / OPEN KNOWLEDGE"
               title={
@@ -383,7 +430,10 @@ export default function App() {
 
             <div>
               {resources.map(([a, b, c], i) => (
-                <a href="[RESOURCE LINK]" key={a}>
+                <a
+                  href="[RESOURCE LINK]"
+                  key={a}
+                >
                   <small>0{i + 1}</small>
 
                   <span>
@@ -398,7 +448,10 @@ export default function App() {
             </div>
           </section>
 
-          <section id="contact" className="contact">
+          <section
+            id="contact"
+            className="contact"
+          >
             <div>
               <p>07 / MAKE CONTACT</p>
 
@@ -425,7 +478,10 @@ export default function App() {
 
         <footer>
           ACM STUDENT CHAPTER
-          <span>BUILT BY THE ACM STUDENT CHAPTER</span> © 2026
+          <span>
+            BUILT BY THE ACM STUDENT CHAPTER
+          </span>{' '}
+          © 2026
         </footer>
 
         {event && (
