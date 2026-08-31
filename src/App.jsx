@@ -1,14 +1,442 @@
-import {useEffect,useMemo,useRef,useState} from 'react'
-import {ArrowDown,ArrowUpRight,BriefcaseBusiness,Code2,ExternalLink,MapPin} from 'lucide-react'
-import {events,projects,resources,team} from './data/content'
-import {Assistant,Atmosphere,Boot,Button,Cursor,Heading,Nav,ProfileArchive,Register,Sound} from './components'
-const types=['All','Workshops','Hackathons','Competitions','Talks']
-export default function App(){let[boot,setBoot]=useState(true),[filter,setFilter]=useState('All'),[event,setEvent]=useState(),[sound,setSound]=useState(false),audio=useRef(),list=useMemo(()=>filter==='All'?events:events.filter(x=>x.type===filter),[filter]);useEffect(()=>{audio.current=new Audio('/assets/audio/struct.mpeg');audio.current.loop=true;audio.current.volume=.18;const pref=localStorage.getItem('acm-sound');setSound(pref==='on');return()=>audio.current?.pause()},[]);async function setAudio(next){if(next){try{await audio.current?.play();setSound(true);localStorage.setItem('acm-sound','on')}catch{setSound(false)}}else{audio.current?.pause();setSound(false);localStorage.setItem('acm-sound','off')}}function enter(){const prior=localStorage.getItem('acm-sound');setAudio(prior!=='off');setBoot(false)}return <><Atmosphere/><Cursor/>{boot&&<Boot enter={enter}/>}<div className={boot?'experience experience--locked':'experience'}><Nav/><Sound on={sound} toggle={()=>setAudio(!sound)}/><main><section id="home" className="hero"><div className="hero__grid"><div className="hero__copy"><p>ACM // STUDENT CHAPTER <i>NETWORK FIELD: ACTIVE</i></p><h1>ENGINEER<br/><i>WHAT'S NEXT.</i></h1><span>ACM Student Chapter is a home for restless learners, generous builders, and technically curious students shaping the future through computing.</span><div className="actions"><Button href="#events">EXPLORE EVENTS</Button><Button href="#contact" quiet>JOIN THE COMMUNITY</Button></div></div><aside className="hero__telemetry glass"><p><b>ACM CORE</b><span>ONLINE</span></p><div><small>NETWORK NODES</small><b>175</b></div><div><small>COMMUNITY MODE</small><b>BUILD / LEARN / SHARE</b></div><div><small>SYSTEM UPLINK</small><b>READY</b></div></aside></div><aside className="system glass"><small>ACM / LIVE SIGNAL</small><b>∞</b><span>LEARN · BUILD · SHARE</span></aside><a className="scroll" href="#about">SCROLL TO EXPLORE <ArrowDown/></a></section>
-<section id="about" className="section about"><b>ACM</b><div><Heading tag="01 / IDENTITY" title={<>Curiosity is the<br/><i>starting point.</i></>} text="We make room for students to encounter computing as a living discipline: build things, share what works, and leave the system better for whoever arrives next."/><div className="facts glass"><span><b>[150+]</b>MEMBERS</span><span><b>[24]</b>EVENTS HELD</span><span><b>[08]</b>ACTIVE PROJECTS</span></div></div></section>
-<section id="events" className="section events"><div className="row"><Heading tag="02 / EVENT ARCHIVE" title={<>The room where<br/><i>things begin.</i></>} text="Workshops, talks, competitions, and long nights spent making something real."/><div className="filters">{types.map(t=><button onClick={()=>setFilter(t)} className={filter===t?'active':''} key={t}>{t}</button>)}</div></div><div className="eventgrid">{list.map((e,i)=><article className="event glass" key={e.title}><div><span>EVENT {String(i+1).padStart(3,'0')}</span><span>{e.status}</span></div><small>{e.date} · {e.type}</small><h3>{e.title}</h3><p>{e.text}</p><button onClick={()=>setEvent(e)}>REGISTER <ArrowUpRight/></button></article>)}</div></section>
-<section className="access section"><Heading tag="02.A / EVENT ACCESS" title={<>Participation,<br/><i>wide open.</i></>} text="Open ACM event participation. Select an event from the archive to start registration."/><article className="access-card glass"><p>EVENT ACCESS</p><b>FREE</b><span>Open ACM event participation</span><Button href="#events">CHOOSE AN EVENT</Button></article></section>
-<section id="members" className="section members"><Heading tag="03 / ACM MEMBER ARCHIVE" title={<>A chapter is not a logo.<br/><i>It is people.</i></>} text="A living archive of the students building the chapter."/><ProfileArchive/></section>
-<section id="projects" className="section projects"><Heading tag="04 / WORK IN PROGRESS" title={<>Small teams.<br/><i>Serious experiments.</i></>} text="Student-led projects that make an idea concrete."/><div>{projects.map((p,i)=><article className="glass" key={p.title}><small>0{i+1} / {p.category}</small><h3>{p.title}</h3><p>{p.text}</p><span>{p.stack.map(s=><b key={s}>{s}</b>)}</span><a href="[GITHUB LINK]">VIEW PROJECT <ExternalLink/></a></article>)}</div></section>
-<section id="achievements" className="section milestones"><Heading tag="05 / MILESTONES" title={<>What we learn<br/><i>leaves a trace.</i></>} text="Verified outcomes belong here as the chapter writes its next season."/><div>{[['01','Competitions','[ADD VERIFIED HACKATHON / CONTEST RESULT]'],['02','Community','[ADD WORKSHOP OR COLLABORATION MILESTONE]'],['03','Growth','[ADD CHAPTER CERTIFICATION OR MEMBER MILESTONE]']].map(x=><article key={x[0]}><small>{x[0]}</small><h3>{x[1]}</h3><p>{x[2]}</p></article>)}</div></section>
-<section id="resources" className="section resources"><Heading tag="06 / OPEN KNOWLEDGE" title={<>Maps for the<br/><i>unmapped.</i></>} text="A few considered places to begin."/><div>{resources.map(([a,b,c],i)=><a href="[RESOURCE LINK]" key={a}><small>0{i+1}</small><span><small>{c}</small><h3>{a}</h3><p>{b}</p></span><ArrowUpRight/></a>)}</div></section>
-<section id="contact" className="contact"><div><p>07 / MAKE CONTACT</p><h2>Bring your<br/><i>curiosity.</i></h2><span><MapPin/> [COLLEGE NAME], [CITY]<br/>[ACM CHAPTER EMAIL]</span></div><a href="mailto:[ACM CHAPTER EMAIL]">START A<br/>CONVERSATION <ArrowUpRight/></a></section></main><footer>ACM STUDENT CHAPTER <span>BUILT BY THE ACM STUDENT CHAPTER</span> © 2026</footer>{event&&<Register event={event} close={()=>setEvent()}/>}<Assistant/></div></>}
+import { useEffect, useMemo, useRef, useState } from 'react'
+
+import {
+  ArrowDown,
+  ArrowUpRight,
+  BriefcaseBusiness,
+  Code2,
+  ExternalLink,
+  MapPin,
+} from 'lucide-react'
+
+import { events, projects, resources, team } from './data/content'
+
+import {
+  Assistant,
+  Atmosphere,
+  Boot,
+  Button,
+  Cursor,
+  Heading,
+  Nav,
+  ProfileArchive,
+  Register,
+  Sound,
+} from './components'
+
+const types = ['All', 'Workshops', 'Hackathons', 'Competitions', 'Talks']
+
+export default function App() {
+  const [boot, setBoot] = useState(true)
+  const [filter, setFilter] = useState('All')
+  const [event, setEvent] = useState()
+  const [sound, setSound] = useState(false)
+
+  const audio = useRef(null)
+
+  const list = useMemo(
+    () => (filter === 'All' ? events : events.filter((x) => x.type === filter)),
+    [filter]
+  )
+
+  useEffect(() => {
+    const audioPath = `${import.meta.env.BASE_URL}assets/audio/struct.mpeg`
+
+    audio.current = new Audio(audioPath)
+    audio.current.loop = true
+    audio.current.volume = 0.18
+
+    const pref = localStorage.getItem('acm-sound')
+    setSound(pref === 'on')
+
+    return () => {
+      audio.current?.pause()
+      audio.current = null
+    }
+  }, [])
+
+  async function setAudio(next) {
+    if (!audio.current) return
+
+    if (next) {
+      try {
+        await audio.current.play()
+
+        setSound(true)
+        localStorage.setItem('acm-sound', 'on')
+      } catch (error) {
+        console.error('Audio could not start:', error)
+        setSound(false)
+      }
+    } else {
+      audio.current.pause()
+      setSound(false)
+      localStorage.setItem('acm-sound', 'off')
+    }
+  }
+
+  function enter() {
+    setBoot(false)
+
+    // The Boot button click is a real user interaction,
+    // so the browser allows audio playback here.
+    setTimeout(() => {
+      setAudio(true)
+    }, 0)
+  }
+
+  return (
+    <>
+      <Atmosphere />
+
+      <Cursor />
+
+      {boot && <Boot enter={enter} />}
+
+      <div className={boot ? 'experience experience--locked' : 'experience'}>
+        <Nav />
+
+        <Sound
+          on={sound}
+          toggle={() => setAudio(!sound)}
+        />
+
+        <main>
+          <section id="home" className="hero">
+            <div className="hero__grid">
+              <div className="hero__copy">
+                <p>
+                  ACM // STUDENT CHAPTER <i>NETWORK FIELD: ACTIVE</i>
+                </p>
+
+                <h1>
+                  ENGINEER
+                  <br />
+                  <i>WHAT'S NEXT.</i>
+                </h1>
+
+                <span>
+                  ACM Student Chapter is a home for restless learners,
+                  generous builders, and technically curious students shaping
+                  the future through computing.
+                </span>
+
+                <div className="actions">
+                  <Button href="#events">EXPLORE EVENTS</Button>
+
+                  <Button href="#contact" quiet>
+                    JOIN THE COMMUNITY
+                  </Button>
+                </div>
+              </div>
+
+              <aside className="hero__telemetry glass">
+                <p>
+                  <b>ACM CORE</b>
+                  <span>ONLINE</span>
+                </p>
+
+                <div>
+                  <small>NETWORK NODES</small>
+                  <b>175</b>
+                </div>
+
+                <div>
+                  <small>COMMUNITY MODE</small>
+                  <b>BUILD / LEARN / SHARE</b>
+                </div>
+
+                <div>
+                  <small>SYSTEM UPLINK</small>
+                  <b>READY</b>
+                </div>
+              </aside>
+            </div>
+
+            <aside className="system glass">
+              <small>ACM / LIVE SIGNAL</small>
+              <b>∞</b>
+              <span>LEARN · BUILD · SHARE</span>
+            </aside>
+
+            <a className="scroll" href="#about">
+              SCROLL TO EXPLORE <ArrowDown />
+            </a>
+          </section>
+
+          <section id="about" className="section about">
+            <b>ACM</b>
+
+            <div>
+              <Heading
+                tag="01 / IDENTITY"
+                title={
+                  <>
+                    Curiosity is the
+                    <br />
+                    <i>starting point.</i>
+                  </>
+                }
+                text="We make room for students to encounter computing as a living discipline: build things, share what works, and leave the system better for whoever arrives next."
+              />
+
+              <div className="facts glass">
+                <span>
+                  <b>[150+]</b>
+                  MEMBERS
+                </span>
+
+                <span>
+                  <b>[24]</b>
+                  EVENTS HELD
+                </span>
+
+                <span>
+                  <b>[08]</b>
+                  ACTIVE PROJECTS
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section id="events" className="section events">
+            <div className="row">
+              <Heading
+                tag="02 / EVENT ARCHIVE"
+                title={
+                  <>
+                    The room where
+                    <br />
+                    <i>things begin.</i>
+                  </>
+                }
+                text="Workshops, talks, competitions, and long nights spent making something real."
+              />
+
+              <div className="filters">
+                {types.map((t) => (
+                  <button
+                    onClick={() => setFilter(t)}
+                    className={filter === t ? 'active' : ''}
+                    key={t}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="eventgrid">
+              {list.map((e, i) => (
+                <article className="event glass" key={e.title}>
+                  <div>
+                    <span>EVENT {String(i + 1).padStart(3, '0')}</span>
+                    <span>{e.status}</span>
+                  </div>
+
+                  <small>
+                    {e.date} · {e.type}
+                  </small>
+
+                  <h3>{e.title}</h3>
+
+                  <p>{e.text}</p>
+
+                  <button onClick={() => setEvent(e)}>
+                    REGISTER <ArrowUpRight />
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="access section">
+            <Heading
+              tag="02.A / EVENT ACCESS"
+              title={
+                <>
+                  Participation,
+                  <br />
+                  <i>wide open.</i>
+                </>
+              }
+              text="Open ACM event participation. Select an event from the archive to start registration."
+            />
+
+            <article className="access-card glass">
+              <p>EVENT ACCESS</p>
+
+              <b>FREE</b>
+
+              <span>Open ACM event participation</span>
+
+              <Button href="#events">CHOOSE AN EVENT</Button>
+            </article>
+          </section>
+
+          <section id="members" className="section members">
+            <Heading
+              tag="03 / ACM MEMBER ARCHIVE"
+              title={
+                <>
+                  A chapter is not a logo.
+                  <br />
+                  <i>It is people.</i>
+                </>
+              }
+              text="A living archive of the students building the chapter."
+            />
+
+            <ProfileArchive />
+          </section>
+
+          <section id="projects" className="section projects">
+            <Heading
+              tag="04 / WORK IN PROGRESS"
+              title={
+                <>
+                  Small teams.
+                  <br />
+                  <i>Serious experiments.</i>
+                </>
+              }
+              text="Student-led projects that make an idea concrete."
+            />
+
+            <div>
+              {projects.map((p, i) => (
+                <article className="glass" key={p.title}>
+                  <small>
+                    0{i + 1} / {p.category}
+                  </small>
+
+                  <h3>{p.title}</h3>
+
+                  <p>{p.text}</p>
+
+                  <span>
+                    {p.stack.map((s) => (
+                      <b key={s}>{s}</b>
+                    ))}
+                  </span>
+
+                  <a href="[GITHUB LINK]">
+                    VIEW PROJECT <ExternalLink />
+                  </a>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="achievements" className="section milestones">
+            <Heading
+              tag="05 / MILESTONES"
+              title={
+                <>
+                  What we learn
+                  <br />
+                  <i>leaves a trace.</i>
+                </>
+              }
+              text="Verified outcomes belong here as the chapter writes its next season."
+            />
+
+            <div>
+              {[
+                [
+                  '01',
+                  'Competitions',
+                  '[ADD VERIFIED HACKATHON / CONTEST RESULT]',
+                ],
+                [
+                  '02',
+                  'Community',
+                  '[ADD WORKSHOP OR COLLABORATION MILESTONE]',
+                ],
+                [
+                  '03',
+                  'Growth',
+                  '[ADD CHAPTER CERTIFICATION OR MEMBER MILESTONE]',
+                ],
+              ].map((x) => (
+                <article key={x[0]}>
+                  <small>{x[0]}</small>
+                  <h3>{x[1]}</h3>
+                  <p>{x[2]}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section id="resources" className="section resources">
+            <Heading
+              tag="06 / OPEN KNOWLEDGE"
+              title={
+                <>
+                  Maps for the
+                  <br />
+                  <i>unmapped.</i>
+                </>
+              }
+              text="A few considered places to begin."
+            />
+
+            <div>
+              {resources.map(([a, b, c], i) => (
+                <a href="[RESOURCE LINK]" key={a}>
+                  <small>0{i + 1}</small>
+
+                  <span>
+                    <small>{c}</small>
+                    <h3>{a}</h3>
+                    <p>{b}</p>
+                  </span>
+
+                  <ArrowUpRight />
+                </a>
+              ))}
+            </div>
+          </section>
+
+          <section id="contact" className="contact">
+            <div>
+              <p>07 / MAKE CONTACT</p>
+
+              <h2>
+                Bring your
+                <br />
+                <i>curiosity.</i>
+              </h2>
+
+              <span>
+                <MapPin /> [COLLEGE NAME], [CITY]
+                <br />
+                [ACM CHAPTER EMAIL]
+              </span>
+            </div>
+
+            <a href="mailto:[ACM CHAPTER EMAIL]">
+              START A
+              <br />
+              CONVERSATION <ArrowUpRight />
+            </a>
+          </section>
+        </main>
+
+        <footer>
+          ACM STUDENT CHAPTER
+          <span>BUILT BY THE ACM STUDENT CHAPTER</span> © 2026
+        </footer>
+
+        {event && (
+          <Register
+            event={event}
+            close={() => setEvent()}
+          />
+        )}
+
+        <Assistant />
+      </div>
+    </>
+  )
+}
